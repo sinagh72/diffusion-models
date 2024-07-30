@@ -1,0 +1,12 @@
+==========DS1==========
+{'auc': 0.4231, 'pr': nan, 'f1': 0.3038, 'accuracy': 0.2219, 'precision': 0.4815, 'loss': 1.4048, 'test_accuracy_NORMAL': 0.4438, 'test_precision_NORMAL': 0.963, 'test_auc_NORMAL': 0.8461, 'test_f1_NORMAL': 0.6076, 'test_accuracy_DRUSEN': 0.0, 'test_precision_DRUSEN': 0.0, 'test_auc_DRUSEN': 0.0, 'test_f1_DRUSEN': 0.0}
+==========DS2==========
+{'auc': 1.0, 'pr': 0.9989, 'f1': 0.7984, 'accuracy': 0.7126, 'precision': 1.0, 'loss': 0.6983, 'test_accuracy_NORMAL': 0.4253, 'test_precision_NORMAL': 1.0, 'test_auc_NORMAL': 0.9999, 'test_f1_NORMAL': 0.5967, 'test_accuracy_AMD': 1.0, 'test_precision_AMD': 1.0, 'test_auc_AMD': 1.0, 'test_f1_AMD': 1.0}
+==========DS3==========
+{'auc': 0.9883, 'pr': 0.9725, 'f1': 0.9287, 'accuracy': 0.895, 'precision': 0.9674, 'loss': 0.1229, 'test_accuracy_DR': 0.9962, 'test_precision_DR': 0.9799, 'test_auc_DR': 0.9983, 'test_f1_DR': 0.988, 'test_accuracy_NORMAL': 0.8198, 'test_precision_NORMAL': 0.9222, 'test_auc_NORMAL': 0.9673, 'test_f1_NORMAL': 0.868, 'test_accuracy_AMD': 0.8691, 'test_precision_AMD': 1.0, 'test_auc_AMD': 0.9992, 'test_f1_AMD': 0.93}
+==========DS4==========
+{'auc': 0.3828, 'pr': nan, 'f1': 0.263, 'accuracy': 0.1905, 'precision': 0.4248, 'loss': 1.8387, 'test_accuracy_NORMAL': 0.381, 'test_precision_NORMAL': 0.8497, 'test_auc_NORMAL': 0.7657, 'test_f1_NORMAL': 0.526, 'test_accuracy_DRUSEN': 0.0, 'test_precision_DRUSEN': 0.0, 'test_auc_DRUSEN': 0.0, 'test_f1_DRUSEN': 0.0}
+==========DS5==========
+{'auc': 0.9759, 'pr': 0.8827, 'f1': 0.837, 'accuracy': 0.8422, 'precision': 0.8337, 'loss': 0.1672, 'test_accuracy_AMD': 0.975, 'test_precision_AMD': 1.0, 'test_auc_AMD': 0.9993, 'test_f1_AMD': 0.9873, 'test_accuracy_CSR': 0.9, 'test_precision_CSR': 0.8182, 'test_auc_CSR': 0.9909, 'test_f1_CSR': 0.8571, 'test_accuracy_NORMAL': 0.8095, 'test_precision_NORMAL': 0.7391, 'test_auc_NORMAL': 0.9643, 'test_f1_NORMAL': 0.7727, 'test_accuracy_DR': 0.6842, 'test_precision_DR': 0.7222, 'test_auc_DR': 0.9427, 'test_f1_DR': 0.7027, 'test_accuracy_HR': 0.8421, 'test_precision_HR': 0.8889, 'test_auc_HR': 0.9825, 'test_f1_HR': 0.8649}
+==========DS6==========
+{'auc': 0.9138, 'pr': 0.851, 'f1': 0.6186, 'accuracy': 0.4991, 'precision': 0.9547, 'loss': 0.9061, 'test_accuracy_NORMAL': 0.2407, 'test_precision_NORMAL': 0.9286, 'test_auc_NORMAL': 0.8974, 'test_f1_NORMAL': 0.3824, 'test_accuracy_AMD': 0.7574, 'test_precision_AMD': 0.9808, 'test_auc_AMD': 0.9301, 'test_f1_AMD': 0.8547}
