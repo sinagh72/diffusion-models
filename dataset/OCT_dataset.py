@@ -151,14 +151,20 @@ def get_oct500_imgs(data_dir: str, **kwargs):
 
 def split_oct500(total_ids: list, train_val_test: tuple):
     """
-    Divides subjects into train, val, test
+    Divides config into train, val, test
     :param total_ids: list of patients ids
     :param train_val_test: (train split, val split, test split) --> the sum should be 1
     """
-    train_idx = math.floor(len(total_ids) * train_val_test[0])
-    return total_ids[0: train_idx], \
-        total_ids[train_idx + 1: math.ceil(len(total_ids) * train_val_test[1]) + train_idx], \
-        total_ids[math.ceil(len(total_ids) * train_val_test[1]) + train_idx + 1:]
+    total_length = len(total_ids)
+
+    train_idx = math.floor(total_length * train_val_test[0])
+    val_idx = math.floor(total_length * train_val_test[1])
+
+    train_data = total_ids[:train_idx]
+    val_data = total_ids[train_idx:train_idx + val_idx]
+    test_data = total_ids[train_idx + val_idx:]
+
+    return train_data, val_data, test_data
 
 
 def get_optovue(list_ids, data_dir, class_label, filter_img=True,
@@ -266,6 +272,13 @@ def get_UIC_DR_imgs(data_dir: str, **kwargs):
                 for img in os.listdir(os.path.join(data_dir, f, category, patient)):
                     img_paths[i] += [(os.path.join(data_dir, f, category, patient, img), (classes[category], category))]
     return img_paths
+
+
+def get_Mario_imgs(root, train_csv, val_csv):
+    train_df = [os.path.join(root, "train", path) for path in pd.read_excel(os.path.join(root, train_csv))['img']]
+    val_df = [os.path.join(root, "val", path) for path in pd.read_excel(os.path.join(root, val_csv))['img']]
+
+    return train_df, val_df
 
 
 def get_class(img_name, classes: dict):

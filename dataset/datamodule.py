@@ -9,7 +9,7 @@ import lightning.pytorch as pl
 import torch
 from torch.utils.data import DataLoader
 from dataset.OCT_dataset import OCTDataset, get_kermany_imgs, get_srinivasan_imgs, get_oct500_imgs, get_nur_dataset, \
-    get_waterloo_dataset, get_class, get_UIC_DR_imgs
+    get_waterloo_dataset, get_class, get_UIC_DR_imgs, get_Mario_imgs
 
 
 class KermanyDataModule(pl.LightningDataModule):
@@ -114,7 +114,8 @@ class KermanyDataModule(pl.LightningDataModule):
 
 
 class SrinivasanDataModule(KermanyDataModule):
-    def __init__(self, dataset_name:str, data_dir: str, batch_size: int, classes: dict, split=None, train_transform=None,
+    def __init__(self, dataset_name: str, data_dir: str, batch_size: int, classes: dict, split=None,
+                 train_transform=None,
                  test_transform=None, num_workers=10):
         """
         :param dataset_name: str
@@ -126,7 +127,7 @@ class SrinivasanDataModule(KermanyDataModule):
         :param test_transform: transforms
 
         """
-        super().__init__(dataset_name,data_dir, batch_size, classes, split, train_transform,
+        super().__init__(dataset_name, data_dir, batch_size, classes, split, train_transform,
                          test_transform)
         self.files = [i for i in range(1, 16)]  # there are 15 subjects for each category
 
@@ -162,7 +163,8 @@ class SrinivasanDataModule(KermanyDataModule):
 
 
 class OCT500DataModule(SrinivasanDataModule):
-    def __init__(self, dataset_name:str, data_dir: str, batch_size: int, classes: dict, split=None, train_transform=None,
+    def __init__(self, dataset_name: str, data_dir: str, batch_size: int, classes: dict, split=None,
+                 train_transform=None,
                  test_transform=None, filter_img: bool = True, merge: dict = None,
                  threemm: bool = True):
         """
@@ -223,9 +225,10 @@ class OCT500DataModule(SrinivasanDataModule):
 
 
 class NurDataModule(KermanyDataModule):
-    def __init__(self, dataset_name:str, data_dir: str, batch_size: int, classes: dict, split=None, train_transform=None,
+    def __init__(self, dataset_name: str, data_dir: str, batch_size: int, classes: dict, split=None,
+                 train_transform=None,
                  test_transform=None):
-        super().__init__(dataset_name,data_dir, batch_size, classes, split, train_transform, test_transform)
+        super().__init__(dataset_name, data_dir, batch_size, classes, split, train_transform, test_transform)
 
     def prepare_data(self):
         # img_paths is a list of three lists corresponds to training, validation and testing
@@ -251,7 +254,8 @@ class NurDataModule(KermanyDataModule):
 
 
 class WaterlooDataModule(KermanyDataModule):
-    def __init__(self, dataset_name:str, data_dir: str, batch_size: int, classes: dict, split=None, train_transform=None,
+    def __init__(self, dataset_name: str, data_dir: str, batch_size: int, classes: dict, split=None,
+                 train_transform=None,
                  test_transform=None):
         super().__init__(dataset_name, data_dir, batch_size, classes, split, train_transform,
                          test_transform)
@@ -279,7 +283,8 @@ class WaterlooDataModule(KermanyDataModule):
 
 
 class OCTDLDataModule(KermanyDataModule):
-    def __init__(self, dataset_name:str, data_dir: str, batch_size: int, classes: dict, split=None, train_transform=None,
+    def __init__(self, dataset_name: str, data_dir: str, batch_size: int, classes: dict, split=None,
+                 train_transform=None,
                  test_transform=None):
         super().__init__(dataset_name, data_dir, batch_size, classes, split, train_transform,
                          test_transform)
@@ -308,7 +313,8 @@ class OCTDLDataModule(KermanyDataModule):
 
 
 class UICDRDataModule(OCTDLDataModule):
-    def __init__(self, dataset_name:str, data_dir: str, batch_size: int, classes: dict, split=None, train_transform=None,
+    def __init__(self, dataset_name: str, data_dir: str, batch_size: int, classes: dict, split=None,
+                 train_transform=None,
                  test_transform=None):
         super().__init__(dataset_name, data_dir, batch_size, classes, split, train_transform,
                          test_transform)
@@ -316,6 +322,33 @@ class UICDRDataModule(OCTDLDataModule):
     def prepare_data(self):
         # img_paths is a list of lists
         self.img_paths = get_UIC_DR_imgs(data_dir=self.data_dir, classes=self.classes)
+
+    def setup(self, stage: str) -> None:
+        # Assign Train for use in Dataloaders
+        if stage == "train":
+            self.data_train = OCTDataset(transform=self.train_transform, img_paths=self.img_paths[0])
+            print("UIC-DR train data len:", len(self.data_train))
+        # Assign val split(s) for use in Dataloaders
+        elif stage == "val":
+            self.data_val = OCTDataset(transform=self.test_transform, img_paths=self.img_paths[1])
+            print("UIC-DR val data len:", len(self.data_val))
+
+        # Assign Test split(s) for use in Dataloaders
+        if stage == "test":
+            self.data_test = OCTDataset(transform=self.test_transform, img_paths=self.img_paths[2])
+            print("UIC-DR test data len:", len(self.data_test))
+
+
+class MarioDataModule(KermanyDataModule):
+    def __init__(self, dataset_name: str, data_dir: str, batch_size: int, classes: dict, split=None,
+                 train_transform=None, val_transform=None):
+        super().__init__(dataset_name, data_dir, batch_size, classes, split, train_transform,
+                         val_transform)
+
+    def prepare_data(self):
+        # img_paths is a list of lists
+        self.img_paths = get_Mario_imgs(self.data_dir, self.train_cvs, self.val_csv)
+        self.img_paths = get_Mario_imgs(self.data_dir, self.train_cvs, self.val_csv)
 
     def setup(self, stage: str) -> None:
         # Assign Train for use in Dataloaders

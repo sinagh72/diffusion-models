@@ -10,7 +10,7 @@ import numpy as np
 from dotenv import load_dotenv
 
 from dataset.datamodule import KermanyDataModule, SrinivasanDataModule, OCT500DataModule, WaterlooDataModule, \
-    NurDataModule, OCTDLDataModule, UICDRDataModule
+    NurDataModule, OCTDLDataModule, UICDRDataModule, MarioDataModule
 from transforms.apply_transforms import get_test_transformation
 from utils.labels import get_merged_classes
 
@@ -143,6 +143,21 @@ def get_datamodule(dataset_name,
         datamodule.setup("val")
         datamodule.setup("test")
 
+    if dataset_name == "DS8":
+        datamodule = MarioDataModule(dataset_name=dataset_name,
+                                     data_dir=dataset_path,
+                                     batch_size=batch_size,
+                                     train_transform=train_transform,
+                                     val_transform=test_transform,
+                                     train_csv="",
+                                     val_csv="",
+                                     classes={},
+                                     )
+        # preparing config
+        datamodule.prepare_data()
+        datamodule.setup("train")
+        datamodule.setup("val")
+
     return datamodule
 
 
@@ -224,6 +239,16 @@ def get_data_modules(batch_size, classes, train_transform=None, test_transform=N
                                        test_transform=test_transform,
                                        )
 
+    client_name = "DS8"
+    DATASET_PATH = os.getenv(client_name + "_PATH")
+    mario_datamodule = get_datamodule(dataset_name=client_name,
+                                      dataset_path=DATASET_PATH,
+                                      batch_size=batch_size,
+                                      uic_dr_classes=classes[7],
+                                      train_transform=train_transform,
+                                      test_transform=test_transform,
+                                      )
+
     data_modules = [
         kermany_datamodule,
         srinivasan_datamodule,
@@ -232,6 +257,7 @@ def get_data_modules(batch_size, classes, train_transform=None, test_transform=N
         waterloo_datamodule,
         octdl_datamodule,
         uic_dr_datamodule,
+        mario_datamodule
     ]
     return data_modules
 
