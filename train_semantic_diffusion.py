@@ -24,7 +24,7 @@ if __name__ == "__main__":
     num_workers = torch.cuda.device_count() * 4
     epochs = 100
     comments = "semantic_diffusion_1"
-    devices = [0,1]
+    devices = [0, 1]
     img_size = 128
     # dataset
     print('loading dataset..')
@@ -39,8 +39,7 @@ if __name__ == "__main__":
             data_modules[1].data_train.img_paths +
             data_modules[2].data_train.img_paths +
             data_modules[3].data_train.img_paths +
-            data_modules[4].data_train.img_paths
-            +
+            data_modules[4].data_train.img_paths +
             data_modules[5].data_train.img_paths
     )
     train_dataset = OCTDataset(transform=get_train_transformation(img_size, channels=1),
@@ -59,8 +58,7 @@ if __name__ == "__main__":
             data_modules[1].data_val.img_paths +
             data_modules[2].data_val.img_paths +
             data_modules[3].data_val.img_paths +
-            data_modules[4].data_val.img_paths
-            +
+            data_modules[4].data_val.img_paths +
             data_modules[5].data_val.img_paths
     )
     val_dataset = OCTDataset(transform=get_test_transformation(img_size, channels=1, unsharp=True),
@@ -93,7 +91,8 @@ if __name__ == "__main__":
         lr=1e-5,
         save_fig_path=save_fig_path,
         img_size=img_size,
-        generate=False
+        generate=False,
+        semantic_encoder=""
     )
     early_stopping = EarlyStopping(monitor="val_loss", patience=10, verbose=False, mode="min")
     tb_logger = TensorBoardLogger(save_dir=os.path.join("checkpoints", comments), name="diffusion")

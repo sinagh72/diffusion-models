@@ -3,6 +3,8 @@ import random
 import numpy as np
 import torch
 import lightning.pytorch as pl
+
+
 def set_seed(seed=42):
     random.seed(seed)
     np.random.seed(seed)
@@ -16,12 +18,9 @@ def set_seed(seed=42):
 
 
 def worker_init_fn(worker_id):
-    worker_seed = torch.initial_seed() % 2**32
+    worker_seed = torch.initial_seed() % 2 ** 32
     np.random.seed(worker_seed)
     random.seed(worker_seed)
-
-
-
 
 
 def count_classes_and_compute_weights(data_loader):
@@ -42,6 +41,7 @@ def count_classes_and_compute_weights(data_loader):
     # Convert to a tensor
     weights_tensor = torch.tensor([class_weights[0], class_weights[1]], dtype=torch.float32)
     return class_counts, weights_tensor
+
 
 def find_key_by_value(my_dict, target_value):
     """

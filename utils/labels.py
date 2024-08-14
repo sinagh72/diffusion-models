@@ -41,9 +41,15 @@ def get_merged_classes():
                       "Moderate": 2,
                       "Severe": 3,
                       }
+    mario_classes = {"Reduced": 0,
+                     "Stable": 1,
+                     "Increased": 2,
+                     "uninterpretable": 3,
+                     "None": -1
+                     }
 
     return (kermany_classes, srinivasan_classes, oct500_classes, nur_classes, waterloo_classes, octdl_classes,
-            uic_dr_classes)
+            uic_dr_classes, mario_classes)
 
 
 def get_full_classes():
@@ -92,6 +98,11 @@ def get_full_classes():
                       "Moderate": 2,
                       "Severe": 3,
                       }
+    mario_classes = {"Reduced": 0,
+                     "Stable": 1,
+                     "Increased": 2,
+                     "Uninterpretable": 3,
+                     }
 
     return (kermany_classes, srinivasan_classes, oct500_classes, nur_classes, waterloo_classes, octdl_classes,
-            uic_dr_classes)
+            uic_dr_classes, mario_classes)

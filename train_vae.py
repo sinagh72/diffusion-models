@@ -19,12 +19,12 @@ if __name__ == "__main__":
     # print_config()
     set_determinism(42)
     set_seed(42)
-    batch_size = 128
+    batch_size = 8
     num_workers = torch.cuda.device_count() * 2
     epochs = 100
-    comments = "vae_2"
-    devices = [0, 1]
-    img_size = 128
+    comments = "vae_1"
+    devices = [0, 1, 2, 3]
+    img_size = 224
     warmup_epochs = 10
     # dataset
     print('loading dataset..')
@@ -39,7 +39,9 @@ if __name__ == "__main__":
                            data_modules[2].data_train.img_paths +
                            data_modules[3].data_train.img_paths +
                            data_modules[4].data_train.img_paths +
-                           data_modules[5].data_train.img_paths
+                           data_modules[5].data_train.img_paths +
+                           data_modules[6].data_train.img_paths +
+                           data_modules[7].data_train.img_paths
                            )
     train_dataset = OCTDataset(transform=get_train_transformation(img_size, channels=1),
                                data_dir="",
@@ -57,7 +59,9 @@ if __name__ == "__main__":
                          data_modules[2].data_val.img_paths +
                          data_modules[3].data_val.img_paths +
                          data_modules[4].data_val.img_paths +
-                         data_modules[5].data_val.img_paths)
+                         data_modules[5].data_val.img_paths +
+                         data_modules[6].data_val.img_paths
+                         )
     val_dataset = OCTDataset(transform=get_test_transformation(img_size, channels=1),
                              data_dir="",
                              img_paths=combined_val_list)

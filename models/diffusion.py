@@ -35,9 +35,12 @@ class Diffusion(pl.LightningModule):
         self.img_size = kwargs["img_size"]
         self.generate = kwargs["generate"]
 
-        self.semantic_encoder = torchvision.models.resnet18()
-        self.semantic_encoder.conv1 = torch.nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False)
-        self.semantic_encoder.fc = torch.nn.Linear(512, kwargs["embedding_dim"])
+        if "semantic_encoder" in kwargs:
+            self.semantic_encoder = kwargs["semantic_encoder"]
+        else:
+            self.semantic_encoder = torchvision.models.resnet18()
+            self.semantic_encoder.conv1 = torch.nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False)
+            self.semantic_encoder.fc = torch.nn.Linear(512, kwargs["embedding_dim"])
 
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(self.parameters(), lr=self.lr)

@@ -5,6 +5,8 @@ __update: add comments
 __update_date: 7/5/2024
 """
 import copy
+import os.path
+
 import lightning.pytorch as pl
 import torch
 from torch.utils.data import DataLoader
@@ -347,20 +349,27 @@ class MarioDataModule(KermanyDataModule):
 
     def prepare_data(self):
         # img_paths is a list of lists
-        self.img_paths = get_Mario_imgs(self.data_dir, self.train_cvs, self.val_csv)
-        self.img_paths = get_Mario_imgs(self.data_dir, self.train_cvs, self.val_csv)
+        self.img_paths1 = get_Mario_imgs(os.path.join(self.data_dir, "data_1"),
+                                         "df_task1_train_challenge.csv",
+                                        "df_task1_val_challenge.csv",
+                                         self.classes,
+                                         "image_at_ti")
+        self.img_paths2 = get_Mario_imgs(os.path.join(self.data_dir, "data_2"),
+                                         "df_task2_train_challenge.csv",
+                                        "df_task2_val_challenge.csv",
+                                         self.classes,
+                                         "image")
 
     def setup(self, stage: str) -> None:
         # Assign Train for use in Dataloaders
         if stage == "train":
-            self.data_train = OCTDataset(transform=self.train_transform, img_paths=self.img_paths[0])
-            print("UIC-DR train data len:", len(self.data_train))
+            self.data_train = OCTDataset(transform=self.train_transform, img_paths=self.img_paths1[0] + self.img_paths2[0])
+            print("Mario train data len:", len(self.data_train))
         # Assign val split(s) for use in Dataloaders
         elif stage == "val":
-            self.data_val = OCTDataset(transform=self.test_transform, img_paths=self.img_paths[1])
-            print("UIC-DR val data len:", len(self.data_val))
+            self.data_val = OCTDataset(transform=self.test_transform, img_paths=self.img_paths1[1] + self.img_paths2[1])
+            print("Mario val data len:", len(self.data_val))
 
-        # Assign Test split(s) for use in Dataloaders
-        if stage == "test":
-            self.data_test = OCTDataset(transform=self.test_transform, img_paths=self.img_paths[2])
-            print("UIC-DR test data len:", len(self.data_test))
+
+if __name__ == "__main__":
+    MarioDataModule()

@@ -19,7 +19,7 @@ if __name__ == "__main__":
     # print_config()
     set_determinism(42)
     set_seed(42)
-    batch_size = 128
+    batch_size = 224
     num_workers = torch.cuda.device_count() * 2
     epochs = 100
     comments = "vqgan_1"
@@ -34,12 +34,14 @@ if __name__ == "__main__":
                                     filter_img=False,
                                     threemm=True
                                     )
-    combined_train_list = (data_modules[0][0].data_train.img_paths +
-                           data_modules[1][0].data_train.img_paths +
-                           data_modules[2][0].data_train.img_paths +
-                           data_modules[3][0].data_train.img_paths +
-                           data_modules[4][0].data_train.img_paths +
-                           data_modules[5][0].data_train.img_paths
+    combined_train_list = (data_modules[0].data_train.img_paths +
+                           data_modules[1].data_train.img_paths +
+                           data_modules[2].data_train.img_paths +
+                           data_modules[3].data_train.img_paths +
+                           data_modules[4].data_train.img_paths +
+                           data_modules[5].data_train.img_paths +
+                           data_modules[6].data_train.img_paths +
+                           data_modules[7].data_train.img_paths 
                            )
     train_dataset = OCTDataset(transform=get_train_transformation(img_size, channels=1),
                                data_dir="",
@@ -52,12 +54,14 @@ if __name__ == "__main__":
         num_workers=num_workers,
         persistent_workers=True
     )
-    combined_val_list = (data_modules[0][0].data_val.img_paths +
-                         data_modules[1][0].data_val.img_paths +
-                         data_modules[2][0].data_val.img_paths +
-                         data_modules[3][0].data_val.img_paths +
-                         data_modules[4][0].data_val.img_paths +
-                         data_modules[5][0].data_val.img_paths)
+    combined_val_list = (data_modules[0].data_val.img_paths +
+                         data_modules[1].data_val.img_paths +
+                         data_modules[2].data_val.img_paths +
+                         data_modules[3].data_val.img_paths +
+                         data_modules[4].data_val.img_paths +
+                         data_modules[5].data_val.img_paths +
+                         data_modules[6].data_train.img_paths 
+                         )
     val_dataset = OCTDataset(transform=get_test_transformation(img_size, channels=1),
                              data_dir="",
                              img_paths=combined_val_list)

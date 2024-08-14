@@ -27,6 +27,7 @@ def get_datamodule(dataset_name,
                    waterloo_classes=None,
                    octdl_classes=None,
                    uic_dr_classes=None,
+                   mario_classes=None,
                    filter_img=True,
                    merge=None,
                    threemm=True,
@@ -149,9 +150,7 @@ def get_datamodule(dataset_name,
                                      batch_size=batch_size,
                                      train_transform=train_transform,
                                      val_transform=test_transform,
-                                     train_csv="",
-                                     val_csv="",
-                                     classes={},
+                                     classes=mario_classes,
                                      )
         # preparing config
         datamodule.prepare_data()
@@ -244,7 +243,7 @@ def get_data_modules(batch_size, classes, train_transform=None, test_transform=N
     mario_datamodule = get_datamodule(dataset_name=client_name,
                                       dataset_path=DATASET_PATH,
                                       batch_size=batch_size,
-                                      uic_dr_classes=classes[7],
+                                      mario_classes=classes[7],
                                       train_transform=train_transform,
                                       test_transform=test_transform,
                                       )
@@ -386,9 +385,11 @@ if __name__ == "__main__":
     data_modules = get_data_modules(batch_size=1,
                                     classes=get_merged_classes(),
                                     train_transform=get_test_transformation(10),
-                                    test_transform=get_test_transformation(10))
+                                    test_transform=get_test_transformation(10),
+                                    env_path="../data/.env")
 
     # Accumulate counts for each dataset
+    data_modules = [data_modules[-1]]
     train_counts, val_counts, test_counts = {}, {}, {}
 
     for data_module in data_modules:

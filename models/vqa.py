@@ -14,7 +14,7 @@ class VQA(pl.LightningModule):
     def __init__(self, **kwargs):
 
         super().__init__()
-        self.vqvae = VQVAE(
+        self.net = VQVAE(
             spatial_dims=kwargs["spatial_dims"],
             in_channels=kwargs["in_channels"],
             out_channels=kwargs["out_channels"],
@@ -35,17 +35,15 @@ class VQA(pl.LightningModule):
         self.intermediary_images = []
 
     def configure_optimizers(self):
-        optimizer = torch.optim.AdamW(self.vqvae.parameters(), lr=self.lr)
+        optimizer = torch.optim.AdamW(self.net.parameters(), lr=self.lr)
         return optimizer
 
     def forward(self, x):
-        reconstruction, quantization_loss = self.vqvae(images=x)
+        reconstruction, quantization_loss = self.net(images=x)
         return reconstruction, quantization_loss
 
     def training_step(self, batch, batch_idx):
         images, labels = batch
-        optimizer_g, optimizer_d = self.optimizers()
-
         reconstruction, quantization_loss = self(images)  # Forward pass
         recons_loss = F.l1_loss(reconstruction.float(), images.float())
         self.metrics["train"]["recons_loss"].append(recons_loss.item())

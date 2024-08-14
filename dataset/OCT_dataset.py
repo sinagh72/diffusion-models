@@ -15,6 +15,8 @@ from PIL import Image
 from natsort import natsorted
 import subsetsum as sb
 
+from utils.utils import find_key_by_value
+
 
 class OCTDataset(Dataset):
 
@@ -274,11 +276,13 @@ def get_UIC_DR_imgs(data_dir: str, **kwargs):
     return img_paths
 
 
-def get_Mario_imgs(root, train_csv, val_csv):
-    train_df = [os.path.join(root, "train", path) for path in pd.read_excel(os.path.join(root, train_csv))['img']]
-    val_df = [os.path.join(root, "val", path) for path in pd.read_excel(os.path.join(root, val_csv))['img']]
+def get_Mario_imgs(root, train_csv, val_csv, classes, column='image'):
+    train_df = pd.read_csv(os.path.join(root, train_csv))
+    val_df = pd.read_csv(os.path.join(root, val_csv))
+    train_data = [(os.path.join(root, "train", row[column]), (row['label'], find_key_by_value(classes, row['label']))) for _, row in train_df.iterrows()]
+    val_data = [(os.path.join(root, "val", row[column]), (-1, "None")) for _, row in val_df.iterrows()]
 
-    return train_df, val_df
+    return train_data, val_data
 
 
 def get_class(img_name, classes: dict):
