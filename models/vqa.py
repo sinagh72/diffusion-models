@@ -56,8 +56,9 @@ class VQA(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         images, _ = batch
         reconstruction, quantization_loss = self(images)  # Forward pass
+        chosen = np.random.randint(len(reconstruction[0]))
         # Get the first reconstruction from the first validation batch for visualisation purposes
-        self.intermediary_images.append(reconstruction[:10, 0])
+        self.intermediary_images.append(reconstruction[chosen, 0])
         reconstruction, quantization_loss = self(images)  # Forward pass
         val_loss = F.l1_loss(reconstruction.float(), images.float())
         self.metrics["val"]["val_loss"].append(val_loss.item())
@@ -75,10 +76,11 @@ class VQA(pl.LightningModule):
                 self.metrics[session][key].clear()
         self.log_dict(log, sync_dist=True, on_epoch=True, prog_bar=True, logger=True)
 
-    def log_img(self):
+    def log_img(self, num=10):
         to_pil = ToPILImage('L')
+        num = len(self.intermediary_images) if num > len(self.intermediary_images) else num
 
-        for i, img in enumerate(self.intermediary_images):
+        for i, img in enumerate(self.intermediary_images[:num]):
             img = (img + 1) / 2 * 255
             img = img.to(torch.uint8)
 

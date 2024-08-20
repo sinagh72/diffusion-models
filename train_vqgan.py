@@ -19,12 +19,12 @@ if __name__ == "__main__":
     # print_config()
     set_determinism(42)
     set_seed(42)
-    batch_size = 224
+    batch_size = 24
     num_workers = torch.cuda.device_count() * 2
     epochs = 100
     comments = "vqgan_1"
-    devices = [0, 1]
-    img_size = 128
+    devices = [0, 1, 2, 3]
+    img_size = 224
     generator_warmup = 10
     # dataset
     print('loading dataset..')

@@ -41,8 +41,7 @@ if __name__ == "__main__":
                            data_modules[4].data_train.img_paths +
                            data_modules[5].data_train.img_paths +
                            data_modules[6].data_train.img_paths +
-                           data_modules[7].data_train.img_paths +
-                           data_modules[7].data_val.img_paths
+                           data_modules[7].data_train.img_paths
                            )
     train_dataset = OCTDataset(transform=get_train_transformation(img_size, channels=1),
                                data_dir="",

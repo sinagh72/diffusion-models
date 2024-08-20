@@ -31,6 +31,8 @@ class VQGAN(VQA):
         self.automatic_optimization = False
         self.generator_warmup = kwargs["generator_warmup"]
 
+        self.metrics["train"] = {"loss_g": [], "loss_d": [], "recons_loss": []}
+
     def configure_optimizers(self):
         optimizer_g = torch.optim.AdamW(self.net.parameters(), lr=self.lr_g)
         optimizer_d = torch.optim.AdamW(self.discriminator.parameters(), lr=self.lr_d)
@@ -78,4 +80,3 @@ class VQGAN(VQA):
         val_loss = F.l1_loss(reconstruction.float(), images.float())
         self.metrics["val"]["val_loss"].append(val_loss.item())
         return val_loss
-
