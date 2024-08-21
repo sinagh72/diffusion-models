@@ -19,7 +19,7 @@ if __name__ == "__main__":
     # print_config()
     set_determinism(42)
     set_seed(42)
-    batch_size = 8
+    batch_size = 10
     num_workers = torch.cuda.device_count() * 2
     epochs = 100
     comments = "vae_1"

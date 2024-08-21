@@ -310,7 +310,7 @@ def get_WF_imgs(root):
     img_paths = []
     for patient in os.listdir(root):
         for scan in os.listdir(os.path.join(root, patient)):
-            img_paths.append((os.path.join(root, patient, scan),0, 0))
+            img_paths.append((os.path.join(root, patient, scan),(0, 0)))
     return img_paths
 
 def get_class(img_name, classes: dict):
