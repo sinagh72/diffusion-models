@@ -10,7 +10,7 @@ import numpy as np
 from dotenv import load_dotenv
 
 from dataset.datamodule import KermanyDataModule, SrinivasanDataModule, OCT500DataModule, WaterlooDataModule, \
-    NurDataModule, OCTDLDataModule, UICDRDataModule, MarioDataModule
+    NurDataModule, OCTDLDataModule, UICDRDataModule, MarioDataModule, WFDataModule
 from transforms.apply_transforms import get_test_transformation
 from utils.labels import get_merged_classes
 
@@ -28,6 +28,7 @@ def get_datamodule(dataset_name,
                    octdl_classes=None,
                    uic_dr_classes=None,
                    mario_classes=None,
+                   wf_classes={},
                    filter_img=True,
                    merge=None,
                    threemm=True,
@@ -84,7 +85,7 @@ def get_datamodule(dataset_name,
         datamodule.setup("val")
         datamodule.setup("test")
 
-    if dataset_name == "DS4":
+    elif dataset_name == "DS4":
         datamodule = NurDataModule(dataset_name=dataset_name,
                                    data_dir=dataset_path,
                                    batch_size=batch_size,
@@ -99,7 +100,7 @@ def get_datamodule(dataset_name,
         datamodule.setup("val")
         datamodule.setup("test")
 
-    if dataset_name == "DS5":
+    elif dataset_name == "DS5":
         datamodule = WaterlooDataModule(dataset_name=dataset_name,
                                         data_dir=dataset_path,
                                         batch_size=batch_size,
@@ -114,7 +115,7 @@ def get_datamodule(dataset_name,
         datamodule.setup("val")
         datamodule.setup("test")
 
-    if dataset_name == "DS6":
+    elif dataset_name == "DS6":
         datamodule = OCTDLDataModule(dataset_name=dataset_name,
                                      data_dir=dataset_path,
                                      batch_size=batch_size,
@@ -129,7 +130,7 @@ def get_datamodule(dataset_name,
         datamodule.setup("val")
         datamodule.setup("test")
 
-    if dataset_name == "DS7":
+    elif dataset_name == "DS7":
         datamodule = UICDRDataModule(dataset_name=dataset_name,
                                      data_dir=dataset_path,
                                      batch_size=batch_size,
@@ -144,13 +145,14 @@ def get_datamodule(dataset_name,
         datamodule.setup("val")
         datamodule.setup("test")
 
-    if dataset_name == "DS8":
+    elif dataset_name == "DS8":
         datamodule = MarioDataModule(dataset_name=dataset_name,
                                      data_dir=dataset_path,
                                      batch_size=batch_size,
                                      train_transform=train_transform,
                                      val_transform=test_transform,
                                      classes=mario_classes,
+                                     split=[0.85, 0.05, 0.1]
                                      )
         # preparing config
         datamodule.prepare_data()
@@ -158,6 +160,20 @@ def get_datamodule(dataset_name,
         datamodule.setup("val")
         datamodule.setup("test")
         datamodule.setup("unlabeled")
+
+    elif dataset_name == "DS9":
+        datamodule = WFDataModule(dataset_name=dataset_name,
+                                     data_dir=dataset_path,
+                                     batch_size=batch_size,
+                                     train_transform=train_transform,
+                                     val_transform=test_transform,
+                                    split=[1],
+                                     classes={},
+                                     )
+        # preparing config
+        datamodule.prepare_data()
+        datamodule.setup("unlabeled")
+
 
     return datamodule
 
@@ -249,6 +265,15 @@ def get_data_modules(batch_size, classes, train_transform=None, test_transform=N
                                       train_transform=train_transform,
                                       test_transform=test_transform,
                                       )
+    client_name = "DS9"
+    DATASET_PATH = os.getenv(client_name + "_PATH")
+    wf_datamodule = get_datamodule(dataset_name=client_name,
+                                      dataset_path=DATASET_PATH,
+                                      batch_size=batch_size,
+                                      wf_classes={},
+                                      train_transform=train_transform,
+                                      test_transform=test_transform,
+                                      )
 
     data_modules = [
         kermany_datamodule,
@@ -258,7 +283,8 @@ def get_data_modules(batch_size, classes, train_transform=None, test_transform=N
         waterloo_datamodule,
         octdl_datamodule,
         uic_dr_datamodule,
-        mario_datamodule
+        mario_datamodule,
+        wf_datamodule
     ]
     return data_modules
 

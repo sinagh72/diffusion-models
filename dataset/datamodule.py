@@ -9,9 +9,10 @@ import os.path
 
 import lightning.pytorch as pl
 import torch
+from skimage.data import data_dir
 from torch.utils.data import DataLoader
 from dataset.OCT_dataset import OCTDataset, get_kermany_imgs, get_srinivasan_imgs, get_oct500_imgs, get_nur_dataset, \
-    get_waterloo_dataset, get_class, get_UIC_DR_imgs, get_Mario_imgs
+    get_waterloo_dataset, get_class, get_UIC_DR_imgs, get_Mario_imgs, get_WF_imgs
 
 
 class KermanyDataModule(pl.LightningDataModule):
@@ -353,12 +354,14 @@ class MarioDataModule(KermanyDataModule):
                                          "df_task1_train_challenge.csv",
                                         "df_task1_val_challenge.csv",
                                          self.classes,
-                                         "image_at_ti")
+                                         "image_at_ti",
+                                         split=self.split)
         self.img_paths2 = get_Mario_imgs(os.path.join(self.data_dir, "data_2"),
                                          "df_task2_train_challenge.csv",
                                         "df_task2_val_challenge.csv",
                                          self.classes,
-                                         "image")
+                                         "image",
+                                         split=self.split)
 
     def setup(self, stage: str) -> None:
         # Assign Train for use in Dataloaders
@@ -367,15 +370,30 @@ class MarioDataModule(KermanyDataModule):
             print("Mario train data len:", len(self.data_train))
         elif stage == "val":
             self.data_val = OCTDataset(transform=self.train_transform, img_paths=self.img_paths1[1] + self.img_paths2[1])
-            print("Mario val data len:", len(self.data_train))
+            print("Mario val data len:", len(self.data_val))
         elif stage == "test":
             self.data_test = OCTDataset(transform=self.train_transform, img_paths=self.img_paths1[2] + self.img_paths2[2])
-            print("Mario test data len:", len(self.data_train))
+            print("Mario test data len:", len(self.data_test))
         # Assign val split(s) for use in Dataloaders
         elif stage == "unlabeled":
             self.data_unlabeled = OCTDataset(transform=self.test_transform, img_paths=self.img_paths1[3] + self.img_paths2[3])
-            print("Mario unlabeled data len:", len(self.data_val))
+            print("Mario unlabeled data len:", len(self.data_unlabeled))
 
+class WFDataModule(KermanyDataModule):
+    def __init__(self, dataset_name: str, data_dir: str, batch_size: int, classes: dict, split=None,
+                 train_transform=None, val_transform=None):
+        super().__init__(dataset_name, data_dir, batch_size, classes, split, train_transform,
+                         val_transform)
+
+    def prepare_data(self):
+        # img_paths is a list of lists
+        self.img_paths = (get_WF_imgs(root=os.path.join(self.data_dir, "CGA")) +
+                       get_WF_imgs(root=os.path.join(self.data_dir,"nCGA")))
+
+    def setup(self, stage: str) -> None:
+            self.data_unlabeled = OCTDataset(transform=self.train_transform,
+                                         img_paths=self.img_paths)
+            print("WF unlabeled data len:", len(self.data_unlabeled))
 
 if __name__ == "__main__":
     MarioDataModule()

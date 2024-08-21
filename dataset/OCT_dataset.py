@@ -306,6 +306,13 @@ def get_Mario_imgs(root, train_csv, val_csv, classes, column='image', split=(0.8
     return train, val, test, unlabeled_data
 
 
+def get_WF_imgs(root):
+    img_paths = []
+    for patient in os.listdir(root):
+        for scan in os.listdir(os.path.join(root, patient)):
+            img_paths.append((os.path.join(root, patient, scan),0, 0))
+    return img_paths
+
 def get_class(img_name, classes: dict):
     """
     returns the label and category of the image
