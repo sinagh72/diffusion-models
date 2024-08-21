@@ -156,6 +156,8 @@ def get_datamodule(dataset_name,
         datamodule.prepare_data()
         datamodule.setup("train")
         datamodule.setup("val")
+        datamodule.setup("test")
+        datamodule.setup("unlabeled")
 
     return datamodule
 

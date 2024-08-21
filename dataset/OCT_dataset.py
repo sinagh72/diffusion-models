@@ -276,13 +276,34 @@ def get_UIC_DR_imgs(data_dir: str, **kwargs):
     return img_paths
 
 
-def get_Mario_imgs(root, train_csv, val_csv, classes, column='image'):
-    train_df = pd.read_csv(os.path.join(root, train_csv))
-    val_df = pd.read_csv(os.path.join(root, val_csv))
-    train_data = [(os.path.join(root, "train", row[column]), (row['label'], find_key_by_value(classes, row['label']))) for _, row in train_df.iterrows()]
-    val_data = [(os.path.join(root, "val", row[column]), (-1, "None")) for _, row in val_df.iterrows()]
+def get_Mario_imgs(root, train_csv, val_csv, classes, column='image', split=(0.85, 0.05, 0.1)):
+    if sum(split) != 1:
+        raise ValueError("Split ratios must sum to 1")
+    data_df = pd.read_csv(os.path.join(root, train_csv))
+    unlabeled_df = pd.read_csv(os.path.join(root, val_csv))
+    unlabeled_data = [(os.path.join(root, "val", row[column]), (-1, "None")) for _, row in unlabeled_df.iterrows()]
 
-    return train_data, val_data
+    patient_ids = data_df['id_patient'].unique()
+    # Step 3: Calculate the number of patients for each set
+    train_size = int(split[0] * len(patient_ids))
+    val_size = int(split[1] * len(patient_ids))
+
+    # Step 4: Split the patient IDs
+    train_ids = patient_ids[:train_size]
+    val_ids = patient_ids[train_size:train_size + val_size]
+    test_ids = patient_ids[train_size + val_size:]
+
+    # Step 5: Create masks for each set
+    train_mask = data_df['id_patient'].isin(train_ids)
+    val_mask = data_df['id_patient'].isin(val_ids)
+    test_mask = data_df['id_patient'].isin(test_ids)
+
+    # Step 6: Split the dataframe
+    train = [(os.path.join(root, "train", row[column]), (row['label'], find_key_by_value(classes, row['label']))) for _, row in data_df[train_mask].iterrows()]
+    val = [(os.path.join(root, "train", row[column]), (row['label'], find_key_by_value(classes, row['label']))) for _, row in data_df[val_mask].iterrows()]
+    test = [(os.path.join(root, "train", row[column]), (row['label'], find_key_by_value(classes, row['label']))) for _, row in data_df[test_mask].iterrows()]
+
+    return train, val, test, unlabeled_data
 
 
 def get_class(img_name, classes: dict):

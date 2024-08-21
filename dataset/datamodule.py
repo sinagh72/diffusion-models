@@ -365,10 +365,16 @@ class MarioDataModule(KermanyDataModule):
         if stage == "train":
             self.data_train = OCTDataset(transform=self.train_transform, img_paths=self.img_paths1[0] + self.img_paths2[0])
             print("Mario train data len:", len(self.data_train))
-        # Assign val split(s) for use in Dataloaders
         elif stage == "val":
-            self.data_val = OCTDataset(transform=self.test_transform, img_paths=self.img_paths1[1] + self.img_paths2[1])
-            print("Mario val data len:", len(self.data_val))
+            self.data_val = OCTDataset(transform=self.train_transform, img_paths=self.img_paths1[1] + self.img_paths2[1])
+            print("Mario val data len:", len(self.data_train))
+        elif stage == "test":
+            self.data_test = OCTDataset(transform=self.train_transform, img_paths=self.img_paths1[2] + self.img_paths2[2])
+            print("Mario test data len:", len(self.data_train))
+        # Assign val split(s) for use in Dataloaders
+        elif stage == "unlabeled":
+            self.data_unlabeled = OCTDataset(transform=self.test_transform, img_paths=self.img_paths1[3] + self.img_paths2[3])
+            print("Mario unlabeled data len:", len(self.data_val))
 
 
 if __name__ == "__main__":
