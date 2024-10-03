@@ -8,6 +8,8 @@ import lightning.pytorch as pl
 from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
 from lightning.pytorch.loggers import TensorBoardLogger
 from monai.utils import set_determinism
+from torchvision.models import ResNet50_Weights
+
 from dataset.datamodule_handler import get_data_modules
 from models.cls import Classifier
 from transforms.apply_transforms import get_train_transformation, get_test_transformation
@@ -18,11 +20,11 @@ from utils.utils import set_seed
 if __name__ == "__main__":
     set_determinism(42)
     set_seed(42)
-    batch_size = 32
+    batch_size = 64
     num_workers = torch.cuda.device_count() * 4
     epochs = 100
     resume = False
-    comments = "resnet18_1"
+    comments = "resnet50_1"
     devices = [1]
     img_size = 128
     # dataset
@@ -34,12 +36,12 @@ if __name__ == "__main__":
                                     test_transform=get_test_transformation(img_size, 3),
                                     filter_img=True,
                                     threemm=True
-                                    )
+                                    )[:-2] #skip wake forest
     for data_module in data_modules:
         save_path = os.path.join(f"./checkpoints", comments, data_module.dataset_name)
-        encoder = torchvision.models.resnet18(num_classes=256)
+        encoder = torchvision.models.resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
         cls_model = Classifier(encoder=copy.copy(encoder),
-                               feature_dim=256,
+                               feature_dim=1000,
                                classes=data_module.classes,
                                lr=1e-4)
 
@@ -66,7 +68,7 @@ if __name__ == "__main__":
             else:
                 cls_model = Classifier.load_from_checkpoint(model_path[0],
                                                             encoder=copy.copy(encoder),
-                                                            feature_dim=256,
+                                                            feature_dim=1000,
                                                             classes=data_module.classes,
                                                             lr=1e-4)
         else:

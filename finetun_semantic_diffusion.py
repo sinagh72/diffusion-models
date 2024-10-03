@@ -60,49 +60,4 @@ if __name__ == "__main__":
                                                generate=False
                                                )
 
-    for data_module in data_modules:
-        save_path = os.path.join(f"checkpoints", comments, data_module.dataset_name)
-        cls_model = Classifier(encoder=copy.copy(diffusion.semantic_encoder),
-                               feature_dim=256,
-                               classes=data_module.classes,
-                               lr=1e-4)
-        early_stopping = EarlyStopping(monitor="val_loss", patience=10, verbose=False, mode="min")
-        tb_logger = TensorBoardLogger(save_dir=save_path, name="cls")
-        checkpoint = ModelCheckpoint(dirpath=save_path,
-                                     filename="cls-{val_loss:.5f}", save_weights_only=False,
-                                     mode="min", monitor="val_loss", save_top_k=1)
 
-        trainer = pl.Trainer(accelerator='gpu', devices=devices, max_epochs=epochs,
-                             callbacks=[
-                                 early_stopping,
-                                 checkpoint],
-                             logger=[tb_logger],
-                             check_val_every_n_epoch=1,
-
-                             )
-        model_path = glob.glob(os.path.join(save_path, "cls-*.ckpt"), )
-        if len(model_path) > 0:
-            if resume:
-                trainer.fit(model=cls_model,
-                            datamodule=data_module,
-                            ckpt_path=model_path[0]
-                            )
-            else:
-                cls_model = Classifier.load_from_checkpoint(model_path[0],
-                                                            encoder=copy.copy(diffusion.semantic_encoder),
-                                                            feature_dim=256,
-                                                            classes=data_module.classes,
-                                                            lr=1e-4)
-        else:
-            trainer.fit(model=cls_model,
-                        datamodule=data_module,
-                        )
-
-        evaluate_model(model=cls_model,
-                       classes=data_module.classes,
-                       dataset_name=data_module.dataset_name,
-                       data_modules=data_modules,
-                       devices=devices,
-                       comments=comments,
-                       epochs=100
-                       )

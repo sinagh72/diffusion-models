@@ -12,7 +12,8 @@ import torch
 from skimage.data import data_dir
 from torch.utils.data import DataLoader
 from dataset.OCT_dataset import OCTDataset, get_kermany_imgs, get_srinivasan_imgs, get_oct500_imgs, get_nur_dataset, \
-    get_waterloo_dataset, get_class, get_UIC_DR_imgs, get_Mario_imgs, get_WF_imgs
+    get_waterloo_dataset, get_class, get_UIC_DR_imgs, get_Mario_imgs, get_WF_imgs, OCTSeqDataset
+from transforms.transformations import rotation
 
 
 class KermanyDataModule(pl.LightningDataModule):
@@ -350,34 +351,137 @@ class MarioDataModule(KermanyDataModule):
 
     def prepare_data(self):
         # img_paths is a list of lists
-        self.img_paths1 = get_Mario_imgs(os.path.join(self.data_dir, "data_1"),
+        self.task1_paths = get_Mario_imgs(os.path.join(self.data_dir, "data_1"),
                                          "df_task1_train_challenge.csv",
                                         "df_task1_val_challenge.csv",
                                          self.classes,
                                          "image_at_ti",
                                          split=self.split)
-        self.img_paths2 = get_Mario_imgs(os.path.join(self.data_dir, "data_2"),
+        self.task2_paths = get_Mario_imgs(os.path.join(self.data_dir, "data_2"),
                                          "df_task2_train_challenge.csv",
                                         "df_task2_val_challenge.csv",
                                          self.classes,
                                          "image",
                                          split=self.split)
 
+        self.task1_seq_paths = get_Mario_imgs(os.path.join(self.data_dir, "data_1"),
+                                         "df_task1_train_challenge.csv",
+                                         "df_task1_val_challenge.csv",
+                                         self.classes,
+                                         ["image_at_ti", "image_at_ti+1"],
+                                         split=self.split)
+
     def setup(self, stage: str) -> None:
         # Assign Train for use in Dataloaders
         if stage == "train":
-            self.data_train = OCTDataset(transform=self.train_transform, img_paths=self.img_paths1[0] + self.img_paths2[0])
+            self.data_train = OCTDataset(transform=self.train_transform, img_paths=self.task1_paths[0] + self.task2_paths[0])
             print("Mario train data len:", len(self.data_train))
         elif stage == "val":
-            self.data_val = OCTDataset(transform=self.train_transform, img_paths=self.img_paths1[1] + self.img_paths2[1])
+            self.data_val = OCTDataset(transform=self.train_transform, img_paths=self.task1_paths[1] + self.task2_paths[1])
             print("Mario val data len:", len(self.data_val))
         elif stage == "test":
-            self.data_test = OCTDataset(transform=self.train_transform, img_paths=self.img_paths1[2] + self.img_paths2[2])
+            self.data_test = OCTDataset(transform=self.train_transform, img_paths=self.task1_paths[2] + self.task2_paths[2])
             print("Mario test data len:", len(self.data_test))
         # Assign val split(s) for use in Dataloaders
         elif stage == "unlabeled":
-            self.data_unlabeled = OCTDataset(transform=self.test_transform, img_paths=self.img_paths1[3] + self.img_paths2[3])
+            self.data_unlabeled = OCTDataset(transform=self.test_transform, img_paths=self.task1_paths[3] + self.task2_paths[3])
             print("Mario unlabeled data len:", len(self.data_unlabeled))
+        elif stage == "task1_train":
+            self.task1_train = OCTSeqDataset(transform=self.train_transform,
+                                         img_paths=self.task1_seq_paths[0])
+            print("Mario task 1 train data len:", len(self.task1_train))
+
+        elif stage == "task2_train":
+            self.task2_train = OCTSeqDataset(transform=self.train_transform,
+                                         img_paths=self.task2_paths[0])
+            print("Mario task 2 train data len:", len(self.task2_train))
+
+        elif stage == "task1_val":
+            self.task1_val = OCTSeqDataset(transform=self.train_transform,
+                                         img_paths=self.task1_seq_paths[1])
+            print("Mario task 1 val data len:", len(self.task1_val))
+
+        elif stage == "task2_val":
+            self.task2_val = OCTSeqDataset(transform=self.train_transform,
+                                         img_paths=self.task2_paths[1])
+            print("Mario task 2 val data len:", len(self.task2_val))
+
+        elif stage == "task1_test":
+            self.task1_test = OCTSeqDataset(transform=self.train_transform,
+                                        img_paths=self.task1_seq_paths[2])
+            print("Mario task 1 test data len:", len(self.task1_test))
+
+        elif stage == "task2_test":
+            self.task2_test = OCTSeqDataset(transform=self.train_transform,
+                                        img_paths=self.task2_paths[2])
+            print("Mario task 2 test data len:", len(self.task2_test))
+    def task1_train_dataloader(self, shuffle: bool = True, drop_last: bool = True, pin_memory: bool = True,
+                         workers: int = torch.cuda.device_count() * 2):
+        """
+        :param num_workers: int, number of workers for training loder training
+        """
+        return DataLoader(self.task1_train,
+                          batch_size=self.batch_size,
+                          shuffle=shuffle,
+                          pin_memory=pin_memory,
+                          drop_last=drop_last,
+                          num_workers=workers)
+    def task1_val_dataloader(self, shuffle: bool = False, drop_last: bool = False, pin_memory: bool = True,
+                         workers: int = torch.cuda.device_count() * 2):
+        """
+        :param num_workers: int, number of workers for training loder training
+        """
+        return DataLoader(self.task1_val,
+                          batch_size=self.batch_size,
+                          shuffle=shuffle,
+                          pin_memory=pin_memory,
+                          drop_last=drop_last,
+                          num_workers=workers)
+    def task1_test_dataloader(self, shuffle: bool = False, drop_last: bool = False, pin_memory: bool = True,
+                         workers: int = torch.cuda.device_count() * 2):
+        """
+        :param num_workers: int, number of workers for training loder training
+        """
+        return DataLoader(self.task1_test,
+                          batch_size=self.batch_size,
+                          shuffle=shuffle,
+                          pin_memory=pin_memory,
+                          drop_last=drop_last,
+                          num_workers=workers)
+
+    def task2_train_dataloader(self, shuffle: bool = True, drop_last: bool = True, pin_memory: bool = True,
+                         workers: int = torch.cuda.device_count() * 2):
+        """
+        :param num_workers: int, number of workers for training loder training
+        """
+        return DataLoader(self.task2_train,
+                          batch_size=self.batch_size,
+                          shuffle=shuffle,
+                          pin_memory=pin_memory,
+                          drop_last=drop_last,
+                          num_workers=workers)
+    def task2_val_dataloader(self, shuffle: bool = False, drop_last: bool = False, pin_memory: bool = True,
+                         workers: int = torch.cuda.device_count() * 2):
+        """
+        :param num_workers: int, number of workers for training loder training
+        """
+        return DataLoader(self.task2_val,
+                          batch_size=self.batch_size,
+                          shuffle=shuffle,
+                          pin_memory=pin_memory,
+                          drop_last=drop_last,
+                          num_workers=workers)
+    def task2_test_dataloader(self, shuffle: bool = False, drop_last: bool = False, pin_memory: bool = True,
+                         workers: int = torch.cuda.device_count() * 2):
+        """
+        :param num_workers: int, number of workers for training loder training
+        """
+        return DataLoader(self.task2_test,
+                          batch_size=self.batch_size,
+                          shuffle=shuffle,
+                          pin_memory=pin_memory,
+                          drop_last=drop_last,
+                          num_workers=workers)
 
 class WFDataModule(KermanyDataModule):
     def __init__(self, dataset_name: str, data_dir: str, batch_size: int, classes: dict, split=None,
@@ -396,4 +500,43 @@ class WFDataModule(KermanyDataModule):
             print("WF unlabeled data len:", len(self.data_unlabeled))
 
 if __name__ == "__main__":
-    MarioDataModule()
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    import matplotlib.patches as mpatches
+    root = "/data1/OCT/Mario/data_1"
+    df_1 = pd.read_csv(os.path.join(root, "df_task1_train_challenge.csv"))
+    print(df_1.size)
+    label_counts = df_1.groupby('label').size()
+    # Plotting the bar chart
+    colors = ['green', 'gray', 'red', 'blue']
+    label_words = {
+        '0': 'Reduced',
+        '1': 'Stable',
+        '2': 'Increased',
+        '3': 'Uninterpretable'
+    }
+
+    # Plotting the bar chart
+    plt.figure(figsize=(8, 6))
+    bars = label_counts.plot(kind='bar', color=colors)
+
+    # Assigning labels to each bar
+    plt.xlabel('Category')
+    plt.ylabel('Number of OCT slices')
+    plt.title('Number of OCT slices per category')
+
+    # Changing the x-axis labels to the corresponding words
+    plt.xticks(ticks=range(len(label_counts)), labels=[label_words[str(label)] for label in label_counts.index], rotation=0)
+    # Adding the total number on top of each bar
+    for i, value in enumerate(label_counts):
+        plt.text(i, value + 10, str(value), ha='center', va='bottom', fontsize=10, fontweight='bold')
+
+    # Manually creating legend handles and labels
+    handles = [mpatches.Patch(color=colors[i], label=label_words[str(label)]) for i, label in
+               enumerate(label_counts.index)]
+    plt.legend(handles=handles, title="Categories")
+    # Adding a legend (caption) for the colors with associated words
+
+    # Displaying the bar chart
+    plt.show()
+

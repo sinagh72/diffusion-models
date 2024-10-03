@@ -42,6 +42,23 @@ class OCTDataset(Dataset):
         return img
 
 
+class OCTSeqDataset(OCTDataset):
+
+    def __init__(self, img_type="L", transform=None, img_paths=None, **kwargs):
+        super().__init__(img_type, transform, img_paths, **kwargs)
+
+    def __getitem__(self, index):
+        img_t, img_t_plus, (label, _) = self.img_paths[index]
+        img_path_t = img_t.replace("\\", "/")  # fixing the path for windows os
+        img_path_t_plus = img_t_plus.replace("\\", "/")  # fixing the path for windows os
+        img_view_t = self.load_img(img_path_t)  # return an image
+        img_view_t_plus = self.load_img(img_path_t_plus)  # return an image
+        if self.transform is not None:
+            img_view_t = self.transform(img_view_t)
+            img_view_t_plus = self.transform(img_view_t_plus)
+        return img_view_t, img_view_t_plus, label
+
+
 def get_kermany_imgs(data_dir: str, **kwargs):
     # make sure the sum of split is 1
     split = kwargs["split"]
@@ -281,7 +298,6 @@ def get_Mario_imgs(root, train_csv, val_csv, classes, column='image', split=(0.8
         raise ValueError("Split ratios must sum to 1")
     data_df = pd.read_csv(os.path.join(root, train_csv))
     unlabeled_df = pd.read_csv(os.path.join(root, val_csv))
-    unlabeled_data = [(os.path.join(root, "val", row[column]), (-1, "None")) for _, row in unlabeled_df.iterrows()]
 
     patient_ids = data_df['id_patient'].unique()
     # Step 3: Calculate the number of patients for each set
@@ -299,9 +315,20 @@ def get_Mario_imgs(root, train_csv, val_csv, classes, column='image', split=(0.8
     test_mask = data_df['id_patient'].isin(test_ids)
 
     # Step 6: Split the dataframe
-    train = [(os.path.join(root, "train", row[column]), (row['label'], find_key_by_value(classes, row['label']))) for _, row in data_df[train_mask].iterrows()]
-    val = [(os.path.join(root, "train", row[column]), (row['label'], find_key_by_value(classes, row['label']))) for _, row in data_df[val_mask].iterrows()]
-    test = [(os.path.join(root, "train", row[column]), (row['label'], find_key_by_value(classes, row['label']))) for _, row in data_df[test_mask].iterrows()]
+    if isinstance(column, list):
+        unlabeled_data = [(os.path.join(root, "val", row[column[0]]), os.path.join(root, "val",row[column[1]]), (-1, "None")) for _, row in
+                          unlabeled_df.iterrows()]
+        train = [(os.path.join(root, "train", row[column[0]]), os.path.join(root, "train", row[column[1]]), (row['label'], find_key_by_value(classes, row['label'])))
+                 for _, row in data_df[train_mask].iterrows()]
+        val = [(os.path.join(root, "train", row[column[0]]), os.path.join(root, "train", row[column[1]]), (row['label'], find_key_by_value(classes, row['label']))) for
+               _, row in data_df[val_mask].iterrows()]
+        test = [(os.path.join(root, "train", row[column[0]]), os.path.join(root, "train", row[column[1]]), (row['label'], find_key_by_value(classes, row['label']))) for
+                _, row in data_df[test_mask].iterrows()]
+    else:
+        unlabeled_data = [(os.path.join(root, "val", row[column]), (-1, "None")) for _, row in unlabeled_df.iterrows()]
+        train = [(os.path.join(root, "train", row[column]), (row['label'], find_key_by_value(classes, row['label']))) for _, row in data_df[train_mask].iterrows()]
+        val = [(os.path.join(root, "train", row[column]), (row['label'], find_key_by_value(classes, row['label']))) for _, row in data_df[val_mask].iterrows()]
+        test = [(os.path.join(root, "train", row[column]), (row['label'], find_key_by_value(classes, row['label']))) for _, row in data_df[test_mask].iterrows()]
 
     return train, val, test, unlabeled_data
 

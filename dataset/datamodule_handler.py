@@ -168,7 +168,7 @@ def get_datamodule(dataset_name,
                                      train_transform=train_transform,
                                      val_transform=test_transform,
                                     split=[1],
-                                     classes={},
+                                     classes=wf_classes,
                                      )
         # preparing config
         datamodule.prepare_data()
@@ -417,7 +417,7 @@ if __name__ == "__main__":
                                     env_path="../data/.env")
 
     # Accumulate counts for each dataset
-    data_modules = [data_modules[-1]]
+    data_modules = [data_modules[7]]
     train_counts, val_counts, test_counts = {}, {}, {}
 
     for data_module in data_modules:

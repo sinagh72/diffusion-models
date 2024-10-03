@@ -46,10 +46,14 @@ class Diffusion(pl.LightningModule):
         optimizer = torch.optim.AdamW(self.parameters(), lr=self.lr)
         return optimizer
 
-    def forward(self, x):
+    def noise_timestep(self, x):
         noise = torch.randn_like(x).to(self.device)
         timesteps = torch.randint(0, self.inferer.scheduler.num_train_timesteps, (noise.shape[0],),
                                   device=noise.device).long()
+        return noise, timesteps
+
+    def forward(self, x):
+        noise, timesteps = self.noise_timestep(x)
         latent = self.semantic_encoder(x)
         noise_pred = self.inferer(inputs=x, diffusion_model=self.unet, noise=noise, timesteps=timesteps,
                                   condition=latent.unsqueeze(2))
