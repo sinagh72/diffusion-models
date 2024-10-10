@@ -10,7 +10,7 @@ from lightning.pytorch.strategies import DDPStrategy
 from monai.utils import set_determinism
 import lightning.pytorch as pl
 from torchvision.models import Swin_V2_T_Weights, ResNet18_Weights, ResNet50_Weights, ConvNeXt_Base_Weights, \
-    ConvNeXt_Small_Weights, ConvNeXt_Tiny_Weights
+    ConvNeXt_Small_Weights, ConvNeXt_Tiny_Weights, Swin_V2_B_Weights
 
 from dataset.OCT_dataset import OCTDataset
 from dataset.datamodule_handler import get_data_modules, get_datamodule
@@ -31,12 +31,12 @@ if __name__ == "__main__":
     # print_config()
     set_determinism(42)
     set_seed(42)
-    batch_size = 128
+    batch_size = 64
     num_workers = torch.cuda.device_count() * 4
     epochs = 100
-    comments = "task1_baseline_8"
+    comments = "task1_baseline_9"
     devices = [1]
-    img_size = 128
+    img_size = 224
     embedding_dim = 256
     resume = False
     lr = 1e-4
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     save_path = os.path.join(f"checkpoints", comments, mario_datamodule.dataset_name)
     cls_model = LSTMClassifier(
         # encoder=torchvision.models.resnet50(weights=ResNet50_Weights.IMAGENET1K_V1),
-                                encoder=torchvision.models.swin_v2_t(weights=Swin_V2_T_Weights.IMAGENET1K_V1),
+                                encoder=torchvision.models.swin_v2_b(weights=Swin_V2_B_Weights.IMAGENET1K_V1),
                            feature_dim=1000,
                            classes=mario_datamodule.classes,
                            lr=lr)

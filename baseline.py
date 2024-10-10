@@ -24,9 +24,9 @@ if __name__ == "__main__":
     num_workers = torch.cuda.device_count() * 4
     epochs = 100
     resume = False
-    comments = "resnet50_1"
+    comments = "resnet50_2"
     devices = [1]
-    img_size = 128
+    img_size = 224
     # dataset
     print('loading dataset..')
 
