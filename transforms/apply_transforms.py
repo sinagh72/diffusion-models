@@ -45,3 +45,18 @@ def get_test_transformation(img_size, channels=3, mean=[0.485, 0.456, 0.406], st
             T.ToDtype(torch.float32, scale=True),
             T.Normalize(mean, std)
         ])
+
+
+def get_finetune_transformation(img_size, channels=3, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):
+    return T.Compose([
+        T.Resize((img_size, img_size), T.InterpolationMode.BICUBIC),
+        T.RandomApply([UnsharpMaskTransform(radius=2, percent=150, threshold=3)], p=0.2),
+        T.RandomHorizontalFlip(p=0.25),
+        T.RandomVerticalFlip(p=0.25),
+        T.RandomApply([T.ColorJitter(0.5, 0.5)], p=0.2),
+        T.RandomApply([T.GaussianBlur(kernel_size=int(5), sigma=(0.75, 1.5))], p=0.2),
+        T.Grayscale(channels),
+        T.ToImage(),
+        T.ToDtype(torch.float32, scale=True),
+        T.Normalize(mean, std)
+    ])
