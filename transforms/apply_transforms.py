@@ -4,7 +4,7 @@ from transforms.transformations import ZScoreNormalization, UnsharpMaskTransform
 import torchvision.transforms.v2 as T
 
 
-def get_train_transformation(img_size, channels=3, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):
+def get_train_transformation(img_size, channels=1, mean=[0.5], std=[0.5]):
     return T.Compose([
         T.Resize((img_size, img_size), T.InterpolationMode.BICUBIC),
         # CustomRotation(angles=[0, 90, 180, 270]),
@@ -16,14 +16,14 @@ def get_train_transformation(img_size, channels=3, mean=[0.485, 0.456, 0.406], s
         # T.RandomApply([T.ColorJitter(0.5, 0.5)], p=0.2),
         # T.RandomApply([T.GaussianBlur(kernel_size=int(5), sigma=(0.75, 1.5))], p=0.2),
         # T.RandomApply([T.ElasticTransform(alpha=(50.0, 200.0), sigma=(5.0, 10.0))], p=0.2),
-        T.Grayscale(1),
+        T.Grayscale(channels),
         T.ToImage(), # Convert to tensor, only if you had a PIL image
         T.ToDtype(torch.float32, scale=True),
         T.Normalize(mean, std)
     ])
 
 
-def get_test_transformation(img_size, channels=3, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225], unsharp=False):
+def get_test_transformation(img_size, channels=1, mean=[0.5], std=[0.5], unsharp=False):
     if unsharp:
         return T.Compose([
             T.Resize((img_size, img_size), T.InterpolationMode.BICUBIC),
@@ -47,7 +47,7 @@ def get_test_transformation(img_size, channels=3, mean=[0.485, 0.456, 0.406], st
         ])
 
 
-def get_finetune_transformation(img_size, channels=3, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):
+def get_finetune_transformation(img_size, channels=1, mean=[0.5], std=[0.5]):
     return T.Compose([
         T.Resize((img_size, img_size), T.InterpolationMode.BICUBIC),
         T.RandomApply([UnsharpMaskTransform(radius=2, percent=150, threshold=3)], p=0.2),
