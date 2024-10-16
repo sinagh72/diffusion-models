@@ -47,9 +47,19 @@ def get_merged_classes():
                      "uninterpretable": 3,
                      "None": -1
                      }
+    oimhs_classes = {"1": 0,
+                     "2": 1,
+                     "3": 2,
+                     "4": 3,
+                     }
+    
+    thoct_classes = {"NORMAL": 0,
+                    "AMD": 1,
+                    "DME": 2,
+                    }
 
     return (kermany_classes, srinivasan_classes, oct500_classes, nur_classes, waterloo_classes, octdl_classes,
-            uic_dr_classes, mario_classes)
+            uic_dr_classes, mario_classes, oimhs_classes, thoct_classes)
 
 
 def get_full_classes():
@@ -104,5 +114,14 @@ def get_full_classes():
                      "Uninterpretable": 3,
                      }
 
+    oimhs_classes = {"1": 0,
+                     "2": 1,
+                     "3": 2,
+                     "4": 3,
+                     }
+    thoct_classes = {"NORMAL": 0,
+                     "AMD": 1,
+                     "DME": 2,
+                     }
     return (kermany_classes, srinivasan_classes, oct500_classes, nur_classes, waterloo_classes, octdl_classes,
-            uic_dr_classes, mario_classes)
+            uic_dr_classes, mario_classes, oimhs_classes, thoct_classes)

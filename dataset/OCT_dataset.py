@@ -39,6 +39,9 @@ class OCTDataset(Dataset):
 
     def load_img(self, img_path):
         img = Image.open(img_path).convert(self.img_type)
+        # If max_width is set and smaller than image width, crop the image
+        if "max_width" in self.kwargs is not None and self.kwargs["max_width"] < img.width:
+            img = img.crop((0, 0, self.kwargs["max_width"], img.height))  # crop width to max_width
         return img
 
 
@@ -339,6 +342,35 @@ def get_WF_imgs(root):
         for scan in os.listdir(os.path.join(root, patient)):
             img_paths.append((os.path.join(root, patient, scan),(0, 0)))
     return img_paths
+
+def get_OIMHS_imgs(root):
+    img_paths = []
+    excel_data = pd.read_excel(os.path.join(root,"Demographics of the participants.xlsx"))
+    img_root = os.path.join(root, "Images")
+    for patient in os.listdir(img_root):
+        excel_row = excel_data[excel_data['Eye ID'] == int(patient)]
+        for scan in os.listdir(os.path.join(img_root, patient)):
+            img_paths.append((os.path.join(img_root, patient, scan),(excel_row['Stage'].iloc[0], int(excel_row['Stage'].iloc[0]))))
+    return img_paths   
+
+def get_THOCT_imgs(root, split, classes):
+    split = np.array(split)
+    assert (split.sum() == 1)
+
+    img_paths = [[] for _ in split]
+    file_names = [f for f in os.listdir(root) if f in classes.keys()]
+    # filter out the files not inside the classes
+    for file in file_names:
+        imgs = os.listdir(os.path.join(root, file))
+        c = 0
+        for i, percentage in enumerate(split):
+            next_c = c + math.ceil(len(imgs) * percentage)
+            # Adjust for potential overshoot in the last iteration
+            if i == len(split) - 1:
+                next_c = len(imgs)
+            img_paths[i] += [(os.path.join(root, file, img), (classes[file], file)) for img in imgs[c:next_c]]
+            c = next_c
+    return img_paths      
 
 def get_class(img_name, classes: dict):
     """

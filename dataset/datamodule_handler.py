@@ -10,7 +10,7 @@ import numpy as np
 from dotenv import load_dotenv
 
 from dataset.datamodule import KermanyDataModule, SrinivasanDataModule, OCT500DataModule, WaterlooDataModule, \
-    NurDataModule, OCTDLDataModule, UICDRDataModule, MarioDataModule, WFDataModule
+    NurDataModule, OCTDLDataModule, UICDRDataModule, MarioDataModule, WFDataModule, OIMHSDataModule, THOCTDataModule
 from transforms.apply_transforms import get_test_transformation
 from utils.labels import get_merged_classes
 
@@ -29,6 +29,9 @@ def get_datamodule(dataset_name,
                    uic_dr_classes=None,
                    mario_classes=None,
                    wf_classes={},
+                   oimhs_classes=None,
+                   thoct_classes=None,
+                   aroi_classes=None,
                    filter_img=True,
                    merge=None,
                    threemm=True,
@@ -167,12 +170,48 @@ def get_datamodule(dataset_name,
                                      batch_size=batch_size,
                                      train_transform=train_transform,
                                      val_transform=test_transform,
-                                    split=[1],
+                                     split=[1],
                                      classes=wf_classes,
                                      )
         # preparing config
         datamodule.prepare_data()
         datamodule.setup("unlabeled")
+
+    elif dataset_name == "DS10":
+        datamodule = OIMHSDataModule(dataset_name=dataset_name,
+                                     data_dir=dataset_path,
+                                     batch_size=batch_size,
+                                     train_transform=train_transform,
+                                     val_transform=test_transform,
+                                     classes=oimhs_classes,
+                                     )
+        # preparing config
+        datamodule.prepare_data()
+        datamodule.setup("None")
+
+    elif dataset_name == "DS11":
+        datamodule = THOCTDataModule(dataset_name=dataset_name,
+                                     data_dir=dataset_path,
+                                     batch_size=batch_size,
+                                     train_transform=train_transform,
+                                     val_transform=test_transform,
+                                     split=[1],
+                                     classes=thoct_classes,
+                                     )
+                                     
+        # preparing config
+        datamodule.prepare_data()
+        datamodule.setup("None")
+
+    elif dataset_name == "DS12":
+        datamodule = AROIDataModule(dataset_name=dataset_name,
+                                     data_dir=dataset_path,
+                                     batch_size=batch_size,
+                                     train_transform=train_transform,
+                                     val_transform=test_transform,
+                                     split=[1],
+                                     classes=thoct_classes,
+                                     )
 
 
     return datamodule
@@ -275,6 +314,28 @@ def get_data_modules(batch_size, classes, train_transform=None, test_transform=N
                                       test_transform=test_transform,
                                       )
 
+    client_name = "DS10"
+    DATASET_PATH = os.getenv(client_name + "_PATH")
+    oimhs_datamodule = get_datamodule(dataset_name=client_name,
+                                    dataset_path=DATASET_PATH,
+                                    batch_size=batch_size,
+                                    oimhs_classes=classes[8],
+                                    train_transform=train_transform,
+                                    test_transform=test_transform,
+                                    )
+                                    
+    client_name = "DS11"
+    DATASET_PATH = os.getenv(client_name + "_PATH")
+    thoct_datamodule = get_datamodule(dataset_name=client_name,
+                                    dataset_path=DATASET_PATH,
+                                    batch_size=batch_size,
+                                    thoct_classes=classes[9],
+                                    train_transform=train_transform,
+                                    test_transform=test_transform,
+                                    )
+
+   
+    
     data_modules = [
         kermany_datamodule,
         srinivasan_datamodule,
@@ -284,7 +345,9 @@ def get_data_modules(batch_size, classes, train_transform=None, test_transform=N
         octdl_datamodule,
         uic_dr_datamodule,
         mario_datamodule,
-        wf_datamodule
+        wf_datamodule,
+        oimhs_datamodule,
+        thoct_datamodule,
     ]
     return data_modules
 

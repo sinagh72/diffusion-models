@@ -1,8 +1,8 @@
 """
 datamodule.py: data module object to load data
 __author: Sina Gholami
-__update: add comments
-__update_date: 7/5/2024
+__update: add add three new datasets
+__update_date: 10/15/2024
 """
 import copy
 import os.path
@@ -12,7 +12,7 @@ import torch
 from skimage.data import data_dir
 from torch.utils.data import DataLoader
 from dataset.OCT_dataset import OCTDataset, get_kermany_imgs, get_srinivasan_imgs, get_oct500_imgs, get_nur_dataset, \
-    get_waterloo_dataset, get_class, get_UIC_DR_imgs, get_Mario_imgs, get_WF_imgs, OCTSeqDataset
+    get_waterloo_dataset, get_class, get_UIC_DR_imgs, get_Mario_imgs, get_WF_imgs, get_OIMHS_imgs, get_THOCT_imgs, OCTSeqDataset
 from transforms.transformations import rotation
 
 
@@ -499,44 +499,34 @@ class WFDataModule(KermanyDataModule):
                                          img_paths=self.img_paths)
             print("WF unlabeled data len:", len(self.data_unlabeled))
 
-if __name__ == "__main__":
-    import pandas as pd
-    import matplotlib.pyplot as plt
-    import matplotlib.patches as mpatches
-    root = "/data1/OCT/Mario/data_1"
-    df_1 = pd.read_csv(os.path.join(root, "df_task1_train_challenge.csv"))
-    print(df_1.size)
-    label_counts = df_1.groupby('label').size()
-    # Plotting the bar chart
-    colors = ['green', 'gray', 'red', 'blue']
-    label_words = {
-        '0': 'Reduced',
-        '1': 'Stable',
-        '2': 'Increased',
-        '3': 'Uninterpretable'
-    }
 
-    # Plotting the bar chart
-    plt.figure(figsize=(8, 6))
-    bars = label_counts.plot(kind='bar', color=colors)
+class OIMHSDataModule(KermanyDataModule):
+    def __init__(self, dataset_name: str, data_dir: str, batch_size: int, classes: dict, split=None,
+                 train_transform=None, val_transform=None):
+        super().__init__(dataset_name, data_dir, batch_size, classes, split, train_transform,
+                         val_transform)
 
-    # Assigning labels to each bar
-    plt.xlabel('Category')
-    plt.ylabel('Number of OCT slices')
-    plt.title('Number of OCT slices per category')
+    def prepare_data(self):
+        # img_paths is a list of lists
+        self.img_paths = get_OIMHS_imgs(root=self.data_dir)
 
-    # Changing the x-axis labels to the corresponding words
-    plt.xticks(ticks=range(len(label_counts)), labels=[label_words[str(label)] for label in label_counts.index], rotation=0)
-    # Adding the total number on top of each bar
-    for i, value in enumerate(label_counts):
-        plt.text(i, value + 10, str(value), ha='center', va='bottom', fontsize=10, fontweight='bold')
+    def setup(self, stage: str) -> None:
+            self.dataset = OCTDataset(transform=self.train_transform,
+                                         img_paths=self.img_paths, max_width=512)
+            print("OIMHS data len:", len(self.dataset))
 
-    # Manually creating legend handles and labels
-    handles = [mpatches.Patch(color=colors[i], label=label_words[str(label)]) for i, label in
-               enumerate(label_counts.index)]
-    plt.legend(handles=handles, title="Categories")
-    # Adding a legend (caption) for the colors with associated words
 
-    # Displaying the bar chart
-    plt.show()
+class THOCTDataModule(KermanyDataModule):
+    def __init__(self, dataset_name: str, data_dir: str, batch_size: int, classes: dict, split=None,
+                 train_transform=None, val_transform=None):
+        super().__init__(dataset_name, data_dir, batch_size, classes, split, train_transform,
+                         val_transform)
 
+    def prepare_data(self):
+        # img_paths is a list of lists
+        self.img_paths = get_THOCT_imgs(root=self.data_dir, classes=self.classes, split=self.split)
+
+    def setup(self, stage: str) -> None:
+            self.dataset = OCTDataset(transform=self.train_transform,
+                                         img_paths=self.img_paths[0])
+            print("THOCT data len:", len(self.dataset))
